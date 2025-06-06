@@ -13,6 +13,18 @@ int cellCount = 25;
 
 double lastUpdateTime = 0;
 
+bool ElementInDeque(Vector2 element, deque<Vector2> deque)
+{
+	for (unsigned int i = 0; i < deque.size(); i++)
+	{
+		if (Vector2Equals(deque[i], element))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool eventTriggered(double interval)
 {
 	double currentTime = GetTime();
@@ -54,12 +66,12 @@ public:
 	Vector2 position;
 	Texture2D texture;
 
-	Food()
+	Food(deque<Vector2> snakeBody)
 	{
 		Image image = LoadImage("Model/food.png");
 		texture = LoadTextureFromImage(image);
 		UnloadImage(image);
-		position = GenerateRandomePos();
+		position = GenerateRandomePos(snakeBody);
 	}
 
 	~Food()
@@ -72,11 +84,21 @@ public:
 		DrawTexture(texture, position.x * cellSize, position.y * cellSize, WHITE);
 	}
 
-	Vector2 GenerateRandomePos()
+	Vector2 GenerateRandomCell()
 	{
 		float x = GetRandomValue(0, cellCount - 1);
 		float y = GetRandomValue(0, cellCount - 1);
 		return Vector2{ x,y };
+	}
+
+	Vector2 GenerateRandomePos(deque<Vector2> snakeBody)
+	{
+		Vector2 position = GenerateRandomCell();
+		while (ElementInDeque(position, snakeBody))
+		{
+			position = GenerateRandomCell();
+		}
+		return position;
 	}
 };
 
@@ -84,7 +106,7 @@ class Game
 {
 public:
 	Snake snake = Snake();
-	Food food = Food();
+	Food food = Food(snake.body);
 
 	void Draw()
 	{
@@ -95,6 +117,15 @@ public:
 	void Update()
 	{
 		snake.Update();
+		CheckCollisionWithFood();
+	}
+
+	void CheckCollisionWithFood()
+	{
+		if (Vector2Equals(snake.body[0], food.position))
+		{
+			food.position = food.GenerateRandomePos(snake.body);
+		}
 	}
 };
 
