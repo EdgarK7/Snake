@@ -10,6 +10,7 @@ Color darkgreen = { 43, 51, 24, 255 };
 
 int cellSize = 30;
 int cellCount = 25;
+int offset = 75;
 
 double lastUpdateTime = 0;
 
@@ -49,7 +50,7 @@ public:
 		{
 			float x = body[i].x;
 			float y = body[i].y;
-			Rectangle segment = Rectangle{ x * cellSize,y * cellSize, (float)cellSize, (float)cellSize};
+			Rectangle segment = Rectangle{offset + x * cellSize, offset + y * cellSize, (float)cellSize, (float)cellSize};
 			DrawRectangleRounded(segment, 0.5, 6, darkgreen);
 		}
 	}
@@ -96,7 +97,7 @@ public:
 
 	void Draw()
 	{
-		DrawTexture(texture, position.x * cellSize, position.y * cellSize, WHITE);
+		DrawTexture(texture, offset + position.x * cellSize,offset + position.y * cellSize, WHITE);
 	}
 
 	Vector2 GenerateRandomCell()
@@ -123,6 +124,7 @@ public:
 	Snake snake = Snake();
 	Food food = Food(snake.body);
 	bool running = true;
+	int score = 0;
 
 	void Draw()
 	{
@@ -147,6 +149,7 @@ public:
 		{
 			food.position = food.GenerateRandomePos(snake.body);
 			snake.addSegment = true;
+			score++;
 		}
 	}
 	
@@ -177,13 +180,14 @@ public:
 		snake.Reset();
 		food.position = food.GenerateRandomePos(snake.body);
 		running = false;
+		score = 0;
 	}
 };
 
 int main()
 {
 	cout << "Game Start" << endl;
-	InitWindow(cellSize * cellCount, cellSize * cellCount, "Snake");
+	InitWindow(2 * offset + cellSize * cellCount,2 * offset + cellSize * cellCount, "Snake");
 	SetTargetFPS(60);
 
 	Game game = Game();
@@ -219,6 +223,9 @@ int main()
 		}
 
 		ClearBackground(green);
+		DrawRectangleLinesEx(Rectangle{ (float)offset - 5,(float)offset - 5 , (float)cellSize * cellCount + 10, (float)cellSize * cellCount + 10 }, 5, darkgreen);
+		DrawText("Snake Game", offset - 5, 20, 40, darkgreen);
+		DrawText(TextFormat("%i",game.score), offset - 5, offset + cellSize * cellCount + 10, 40, darkgreen);
 		game.Draw();
 
 		EndDrawing();
